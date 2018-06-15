@@ -27,11 +27,9 @@ encodeRadio(graph(_, N, Edges), Map, MinCs, Cs):-
     findall(V, between(1,N,V), VertList), %get vartices list
     length(Map, N),
     encode_strongly_connected_graph(N, Edges, Map, VertList, Cs - Cs1), %encode all the paths.
-    write("After all the proccess, Map is:"),
-    print(Map),
-    print("CS is:"),
-    print(Cs),
-    sum_radios(N, Map, MinCs, Cs1- []).
+    sum_radios(N, Map, MinCs, Cs1- []),
+    writeln("in ENCODE, map is" + Map),
+    writeln("in ENCODE, MinCs is" + MinCs).
 
 %encode_strongly_connected_graph(+, +, -, +, Cs - Cs1). 
 %verify that:
@@ -92,7 +90,7 @@ encode_valid_edge_case_two([(A1, A2,1)|RestEdges],Map, V1, V2, [X,XX|XS],
                                                      int_eq_reif(V1, A1, X1),
                                                      int_eq_reif(V2, A2, X2),
                                                      bool_and_reif(X1, X2, X),
-                                                     %opposite
+                                                      %opposite
                                                      int_eq_reif(V1, A2, XX1),
                                                      int_eq_reif(V2, A1, XX2),
                                                      bool_and_reif(XX1, XX2, XX)
@@ -109,11 +107,26 @@ encode_valid_edge_case_two([(A1, A2,2)|RestEdges],Map, V1, V2, [X,XX|XS],
                                                      int_eq_reif(V1, A2, XX1),
                                                      int_eq_reif(V2, A1, XX2),
                                                      bool_array_and_reif([XX1, XX2, B2],XX)
-                                                    |Cs1] -Cs2):-
+                                                    |Cs1] -Cs2):-                                            
     nth1(A1, Map, B1),
     nth1(A2, Map, B2),
     encode_valid_edge_case_two(RestEdges, Map, V1, V2, XS, Cs1-Cs2).
 
-%sun the number of STRONG transmiters.
+%sum the number of STRONG transmiters.
 sum_radios(N, Map, Sum, [new_int(Sum, 0, N),
                         bool_array_sum_eq(Map, Sum)| Cs] - Cs).
+
+
+
+
+decodeRadio(Map, Solution):-
+    writeln("DECODE -- Sol is: " + Map),
+    length(Map, N),
+    findall(C, (between(1,N,I), nth1(I, Map,A), transmiter(A,T),
+                C=(I, T)), Solution).
+
+transmiter(-1,1).
+transmiter(1,2).
+
+
+verifyRadio(graph(_,N,Edges), Solution).
