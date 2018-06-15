@@ -120,13 +120,64 @@ sum_radios(N, Map, Sum, [new_int(Sum, 0, N),
 
 
 decodeRadio(Map, Solution):-
-    writeln("DECODE -- Sol is: " + Map),
+    writeln("DECODE -- Map is: " + Map),    
     length(Map, N),
-    findall(C, (between(1,N,I), nth1(I, Map,A), transmiter(A,T),
-                C=(I, T)), Solution).
+    findall(Pair, (between(1,N,I),nth1(I, Map, A), transmiter(A, T), Pair=(I,T)),
+        Solution),
+    writeln("DECODE -- Sol is: " + Solution).
 
-transmiter(-1,1).
+transmiter(-1,1).   
 transmiter(1,2).
 
 
-verifyRadio(graph(_,N,Edges), Solution).
+
+%We need to make sure that the graph is Strongly Connected.
+%In other words - from each V we can arrive to another V'
+verifyRadio(graph(_,N,Edges), Solution):-
+    %first we verify all the Vertex are in the solution
+    findall(V, (between(1,N,I), V = (I,_)), Solution),
+    %create all pairs, to make sure there is path from any V to V'
+    findall(I, between(1,N,I), VertList),
+    findall(T, (pairs(V1, V2, VertList), T=(V1,V2)), Pairs),
+    verify_all_pairs_in_path(Pairs, Solution, Edges).
+
+pairs(V1, V2, VertList):-
+    member(V1, VertList),
+    member(V2, VertList),
+    V1 \= V2.
+
+%verify_all_pairs_in_path(+,+,+)
+%make sure there is path from any V to V' (V,V') in Pairs
+verify_all_pairs_in_path([], _, _).
+verify_all_pairs_in_path([(V1,Vn)| VertList], Solution, Edges):-
+    dfsWannaBe(V1, Vn, Solution, Edges),
+    verify_all_pairs_in_path(VertList, Solution, Edges).
+
+%we return true iff there is a VALID path from V1 to Vn
+%with the Edges and the Solution.
+dfsWannaBe(V1, Vn, Solution, Edges):-
+                %[V1] stand for a path list that we'll build incremently. 
+    dfsWannaBe_helper(V1,[V1], Vn, Solution, Edges).
+
+dfsWannaBe_helper(Vn, _, Vn, _,_) :- !.
+
+dfsWannaBe_helper(V1, OnGoingPath, Vn, Solution, Edges):-
+    arc(V1, Solution, Edges, V2),
+    \+ member(V2, OnGoingPath),
+    dfsWannaBe_helper(V2,[V2|OnGoingPath], Vn, Solution, Edges).
+
+%transmitter of 1 can go only with 1 weighted paths
+combinations(1,1).
+%transmitter of 2 can go with 1,2 weighted paths
+combinations(2,1).
+combinations(2,2).
+
+%will check there is a OK path from V1 to V2 and it can be only iff
+% 1. the distance between V1 and V2 is 1 and V1 has a 1 transmitter
+% 2. V1 has a strong transmitter
+arc(V1, Solution, Edges, V2):-
+    combinations(A,B),
+    member((V1,A), Solution),
+    % we do that first       OR      this part. 
+    (member((V1,V2,B),Edges) ; member((V2,V1,B),Edges)).
+
