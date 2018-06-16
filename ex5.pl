@@ -27,9 +27,7 @@ encodeRadio(graph(_, N, Edges), Map, MinCs, Cs):-
     findall(V, between(1,N,V), VertList), %get vartices list
     length(Map, N),
     encode_strongly_connected_graph(N, Edges, Map, VertList, Cs - Cs1), %encode all the paths.
-    sum_radios(N, Map, MinCs, Cs1- []),
-    writeln("in ENCODE, map is" + Map),
-    writeln("in ENCODE, MinCs is" + MinCs).
+    sum_radios(N, Map, MinCs, Cs1- []).
 
 %encode_strongly_connected_graph(+, +, -, +, Cs - Cs1). 
 %verify that:
@@ -120,11 +118,9 @@ sum_radios(N, Map, Sum, [new_int(Sum, 0, N),
 
 
 decodeRadio(Map, Solution):-
-    writeln("DECODE -- Map is: " + Map),    
     length(Map, N),
     findall(Pair, (between(1,N,I),nth1(I, Map, A), transmiter(A, T), Pair=(I,T)),
-        Solution),
-    writeln("DECODE -- Sol is: " + Solution).
+        Solution).
 
 transmiter(-1,1).   
 transmiter(1,2).
